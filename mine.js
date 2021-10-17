@@ -22,8 +22,10 @@ function mine() {
   if(!mining) return;
 
   const block = new Block();
-
-  // TODO: add transactions from the mempool
+  const len = db.mempool.length
+  for(let i =0;i<len;i++ ) {
+    block.addTransaction(db.mempool.shift())
+  }
 
   const coinbaseUTXO = new UTXO(PUBLIC_KEY, BLOCK_REWARD);
   const coinbaseTX = new Transaction([], [coinbaseUTXO]);
@@ -36,10 +38,11 @@ function mine() {
   block.execute();
 
   db.blockchain.addBlock(block);
-
+  console.log('utxos',db.utxos)
+  console.log('trn pool',db.mempool)
   console.log(`Mined block #${db.blockchain.blockHeight()} with a hash of ${block.hash()} at nonce ${block.nonce}`);
 
-  setTimeout(mine, 2500);
+  setTimeout(mine, 10000);
 }
 
 module.exports = {

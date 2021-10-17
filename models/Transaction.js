@@ -4,6 +4,7 @@ class Transaction {
   constructor(inputs, outputs) {
     this.inputs = inputs;
     this.outputs = outputs;
+
   }
   execute() {
     this.inputs.forEach((input) => {
@@ -12,6 +13,7 @@ class Transaction {
     this.outputs.forEach((output) => {
       utxos.push(output);
     });
+    
   }
 }
 
