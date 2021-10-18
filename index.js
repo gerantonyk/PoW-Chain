@@ -4,6 +4,7 @@ const {PORT} = require('./config');
 const {utxos,mempool} = require('./db');
 const UTXO = require('./models/UTXO');
 const Transaction = require('./models/Transaction');
+const {verify} = require('./verify')
 // create a server
 const server = jayson.server({
   startMining: function(_, callback) {
@@ -14,7 +15,7 @@ const server = jayson.server({
     callback(null, 'success!');
     stopMining();
   },
-  getBalance: function([address,a], callback) {
+  getBalance: function([address], callback) {
     const ourUTXOs = utxos.filter(x => {
       return x.owner === address && !x.spent;
     });
@@ -24,7 +25,7 @@ const server = jayson.server({
 
     callback(null, {sum,a});
   },
-  sendAmount: function([fromAddress,amount,toAddress], callback) {
+  sendAmount: function([fromAddress,amount,toAddress,signature], callback) {
     
     let sum = 0
     const ourUTXOs = utxos.filter(x => {
@@ -33,7 +34,8 @@ const server = jayson.server({
     });
     
     console.log('a ver',ourUTXOs,sum)
-   
+    
+    if (!verify(fromAddress,amount, signature)) return callback(null, 'Incorrect signature');
     if (sum>=amount) {
       const transferUTXO = new UTXO(toAddress, amount);
       const changeUTXO = new UTXO(fromAddress, sum-amount);
